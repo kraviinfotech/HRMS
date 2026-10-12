@@ -1,4 +1,4 @@
-import { Download, PauseCircle, PlayCircle } from "lucide-react";
+import { Download, PauseCircle, PlayCircle, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Badge } from "../../components/ui/Badge.jsx";
 import { Button } from "../../components/ui/Button.jsx";
@@ -29,6 +29,8 @@ const fields = [
   { name: "phone", label: "Phone" },
   { name: "department", label: "Department", required: true },
   { name: "designation", label: "Designation", required: true },
+  { name: "shiftStartTime", label: "Shift from", type: "time", required: true, defaultValue: "09:00" },
+  { name: "shiftEndTime", label: "Shift to", type: "time", required: true, defaultValue: "18:00" },
   { name: "joiningDate", label: "Joining date", type: "date", required: true },
   { name: "dateOfBirth", label: "Date of birth", type: "date" },
   { name: "address", label: "Address", type: "textarea" },
@@ -51,6 +53,7 @@ export default function Employees() {
         { key: "email", label: "Email" },
         { key: "department", label: "Department" },
         { key: "designation", label: "Designation" },
+        { key: "shift", label: "Shift", render: (row) => `${row.shiftStartTime || "09:00"} - ${row.shiftEndTime || "18:00"}` },
         { key: "joiningDate", label: "Joined", render: (row) => formatDate(row.joiningDate) },
         { key: "employmentStatus", label: "Status", render: (row) => <Badge value={row.employmentStatus} /> },
       ]}
@@ -77,6 +80,16 @@ export default function Employees() {
           body: { status: "active" },
           disabled: (row) => row.employmentStatus === "active",
           confirmMessage: "Reactivate this employee account?",
+        },
+        {
+          label: "Delete",
+          icon: Trash2,
+          variant: "danger",
+          method: "delete",
+          path: (row) => `/employees/${row._id}`,
+          confirmTitle: "Delete employee?",
+          confirmMessage: "This will permanently delete this employee, login account, attendance, leave, payroll, timesheet, task, ticket, document, session, notification, and OTP records. This cannot be undone.",
+          success: "Employee deleted",
         },
       ]}
       emptyTitle="No employees found"

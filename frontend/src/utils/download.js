@@ -1,7 +1,7 @@
 import { api } from "../api/client.js";
 
-export async function downloadFromApi(path, filename) {
-  const response = await api.get(path, { responseType: "blob" });
+export async function downloadFromApi(path, filename, params) {
+  const response = await api.get(path, { params, responseType: "blob" });
   const url = URL.createObjectURL(new Blob([response.data]));
   const anchor = document.createElement("a");
   anchor.href = url;

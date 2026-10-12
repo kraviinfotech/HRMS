@@ -27,6 +27,7 @@ export default function EmployeeDetails() {
     ["Phone", employee.phone],
     ["Department", employee.department],
     ["Designation", employee.designation],
+    ["Shift", `${employee.shiftStartTime || "09:00"} - ${employee.shiftEndTime || "18:00"}`],
     ["Joining Date", formatDate(employee.joiningDate)],
     ["Date of Birth", formatDate(employee.dateOfBirth)],
     ["Reporting Manager", employee.reportingManager ? `${employee.reportingManager.firstName} ${employee.reportingManager.lastName}` : "-"],

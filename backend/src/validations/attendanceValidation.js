@@ -1,8 +1,15 @@
 import { z } from "zod";
-import { locationSchema, objectId, paginationQuery } from "./commonValidation.js";
+import { objectId, paginationQuery } from "./commonValidation.js";
+
+const attendanceLocationSchema = z.object({
+  latitude: z.coerce.number().min(-90).max(90),
+  longitude: z.coerce.number().min(-180).max(180),
+  accuracy: z.coerce.number().nonnegative().optional(),
+  label: z.string().max(160).optional(),
+});
 
 export const attendancePunchSchema = z.object({
-  body: z.object({ location: locationSchema }),
+  body: z.object({ location: attendanceLocationSchema }),
   params: z.object({}),
   query: z.object({}),
 });

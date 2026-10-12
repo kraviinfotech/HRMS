@@ -31,6 +31,7 @@ export function ResourceForm({ fields, onSubmit, loading, submitLabel = "Save" }
               className="sm:col-span-2"
               error={error}
               placeholder={field.placeholder}
+              defaultValue={field.defaultValue}
               {...register(field.name, rules)}
             />
           );
@@ -43,6 +44,7 @@ export function ResourceForm({ fields, onSubmit, loading, submitLabel = "Save" }
               label={field.label}
               error={error}
               options={field.options}
+              defaultValue={field.defaultValue}
               {...register(field.name, rules)}
             />
           );
@@ -65,6 +67,7 @@ export function ResourceForm({ fields, onSubmit, loading, submitLabel = "Save" }
             error={error}
             placeholder={field.placeholder}
             autoComplete={field.autoComplete}
+            defaultValue={field.defaultValue}
             min={field.min}
             max={field.max}
             minLength={field.minLength}

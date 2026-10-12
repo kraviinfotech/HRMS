@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { objectId, paginationQuery, passwordSchema } from "./commonValidation.js";
 
+const timeSchema = z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Use HH:mm time format");
+
 const employeeBody = z.object({
   employeeCode: z.string().min(3).max(40).optional(),
   firstName: z.string().min(1).max(80),
@@ -9,6 +11,8 @@ const employeeBody = z.object({
   phone: z.string().max(30).optional(),
   department: z.string().min(1).max(80),
   designation: z.string().min(1).max(80),
+  shiftStartTime: timeSchema.default("09:00"),
+  shiftEndTime: timeSchema.default("18:00"),
   reportingManager: objectId.optional().or(z.literal("")),
   joiningDate: z.coerce.date(),
   employmentStatus: z.enum(["probation", "active", "notice", "exited", "inactive"]).optional(),

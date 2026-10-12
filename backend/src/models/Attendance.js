@@ -36,6 +36,8 @@ const attendanceSchema = new mongoose.Schema(
     durationMinutes: { type: Number, default: 0 },
     lateMinutes: { type: Number, default: 0 },
     overtimeMinutes: { type: Number, default: 0 },
+    shiftStartTime: String,
+    shiftEndTime: String,
     punches: [punchSchema],
     correctionRequest: {
       status: { type: String, enum: ["none", "pending", "approved", "rejected"], default: "none" },

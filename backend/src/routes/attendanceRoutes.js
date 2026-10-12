@@ -12,6 +12,7 @@ import {
 export const attendanceRoutes = Router();
 
 attendanceRoutes.get("/", requireAuth, validate(attendanceListSchema), attendance.index);
+attendanceRoutes.get("/export", requireAuth, requireRole("admin"), validate(attendanceListSchema), attendance.exportReport);
 attendanceRoutes.get("/today", requireAuth, requireRole("employee"), attendance.today);
 attendanceRoutes.post("/check-in", requireAuth, requireRole("employee"), validate(attendancePunchSchema), attendance.punchIn);
 attendanceRoutes.post("/check-out", requireAuth, requireRole("employee"), validate(attendancePunchSchema), attendance.punchOut);

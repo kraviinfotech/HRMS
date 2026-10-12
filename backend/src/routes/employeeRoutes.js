@@ -18,3 +18,4 @@ employeeRoutes.post("/", requireAuth, requireRole("admin"), validate(createEmplo
 employeeRoutes.get("/:id", requireAuth, validate(idParam), employees.show);
 employeeRoutes.patch("/:id", requireAuth, requireRole("admin"), validate(updateEmployeeSchema), employees.update);
 employeeRoutes.patch("/:id/status", requireAuth, requireRole("admin"), validate(employeeStatusSchema), employees.status);
+employeeRoutes.delete("/:id", requireAuth, requireRole("admin"), validate(idParam), employees.destroy);

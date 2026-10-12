@@ -1,4 +1,14 @@
 import { Employee } from "../models/Employee.js";
+import { Attendance } from "../models/Attendance.js";
+import { Document } from "../models/Document.js";
+import { Leave } from "../models/Leave.js";
+import { Notification } from "../models/Notification.js";
+import { OtpToken } from "../models/OtpToken.js";
+import { Payroll } from "../models/Payroll.js";
+import { Session } from "../models/Session.js";
+import { Task } from "../models/Task.js";
+import { Ticket } from "../models/Ticket.js";
+import { Timesheet } from "../models/Timesheet.js";
 import { User } from "../models/User.js";
 import { HttpError, assertOrThrow } from "../utils/httpError.js";
 import { getPagination, paginate } from "../utils/pagination.js";
@@ -101,6 +111,97 @@ export async function setEmployeeStatus(id, status) {
   await employee.save();
   await User.findByIdAndUpdate(employee.user, { status: status === "active" ? "active" : "inactive" });
   return employee;
+}
+
+function deletedCount(result) {
+  return result?.deletedCount || 0;
+}
+
+export async function deleteEmployeeCascade(id) {
+  const employee = await Employee.findById(id).populate("user");
+  assertOrThrow(employee, 404, "Employee not found");
+
+  const userId = employee.user?._id || employee.user;
+  if (employee.user?.role === "admin") {
+    throw new HttpError(409, "Admin accounts cannot be deleted from employee management");
+  }
+
+  const userFilters = userId
+    ? {
+        user: userId,
+        email: employee.email,
+      }
+    : {
+        user: undefined,
+        email: employee.email,
+      };
+
+  const [
+    attendances,
+    documents,
+    leaves,
+    payrolls,
+    tasks,
+    tickets,
+    timesheets,
+    notifications,
+    otpTokens,
+    sessions,
+  ] = await Promise.all([
+    Attendance.deleteMany({ employee: employee._id }),
+    Document.deleteMany({
+      $or: [{ employee: employee._id }, ...(userId ? [{ uploadedBy: userId }] : [])],
+    }),
+    Leave.deleteMany({ employee: employee._id }),
+    Payroll.deleteMany({ employee: employee._id }),
+    Task.deleteMany({ assignee: employee._id }),
+    Ticket.deleteMany({
+      $or: [{ employee: employee._id }, ...(userId ? [{ createdBy: userId }] : [])],
+    }),
+    Timesheet.deleteMany({ employee: employee._id }),
+    userId ? Notification.deleteMany({ user: userId }) : Promise.resolve({ deletedCount: 0 }),
+    OtpToken.deleteMany({
+      $or: [{ email: userFilters.email }, ...(userId ? [{ user: userFilters.user }] : [])],
+    }),
+    userId ? Session.deleteMany({ user: userId }) : Promise.resolve({ deletedCount: 0 }),
+  ]);
+
+  if (userId) {
+    await Promise.all([
+      Task.updateMany({ "comments.author": userId }, { $pull: { comments: { author: userId } } }),
+      Ticket.updateMany(
+        { $or: [{ assignee: userId }, { "comments.author": userId }, { "history.actor": userId }] },
+        {
+          $unset: { assignee: "" },
+          $pull: {
+            comments: { author: userId },
+            history: { actor: userId },
+          },
+        },
+      ),
+      User.deleteOne({ _id: userId }),
+    ]);
+  }
+
+  await Promise.all([
+    Employee.updateMany({ reportingManager: employee._id }, { $unset: { reportingManager: "" } }),
+    Employee.deleteOne({ _id: employee._id }),
+  ]);
+
+  return {
+    employee: 1,
+    user: userId ? 1 : 0,
+    attendances: deletedCount(attendances),
+    documents: deletedCount(documents),
+    leaves: deletedCount(leaves),
+    payrolls: deletedCount(payrolls),
+    tasks: deletedCount(tasks),
+    tickets: deletedCount(tickets),
+    timesheets: deletedCount(timesheets),
+    notifications: deletedCount(notifications),
+    otpTokens: deletedCount(otpTokens),
+    sessions: deletedCount(sessions),
+  };
 }
 
 export async function ensureEmployeeForUser(user) {

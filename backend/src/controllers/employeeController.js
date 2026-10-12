@@ -1,5 +1,6 @@
 import {
   createEmployee,
+  deleteEmployeeCascade,
   getEmployeeById,
   listEmployees,
   setEmployeeStatus,
@@ -46,6 +47,12 @@ export const status = asyncHandler(async (req, res) => {
   const employee = await setEmployeeStatus(req.params.id, req.validated.body.status);
   await writeAudit({ req, action: `${req.validated.body.status}_employee`, entity: "Employee", entityId: employee._id });
   sendSuccess(res, employee, "Employee status updated");
+});
+
+export const destroy = asyncHandler(async (req, res) => {
+  const summary = await deleteEmployeeCascade(req.params.id);
+  await writeAudit({ req, action: "delete_employee", entity: "Employee", entityId: req.params.id, metadata: summary });
+  sendSuccess(res, summary, "Employee and related records deleted");
 });
 
 export const exportCsv = asyncHandler(async (req, res) => {

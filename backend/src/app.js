@@ -9,12 +9,19 @@ import { enforceCsrf } from "./middleware/csrf.js";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import { apiRoutes } from "./routes/index.js";
 
+function requestLogLevel(_req, res, error) {
+  if (error || res.statusCode >= 500) return "error";
+  if (res.statusCode >= 400) return "warn";
+  return "silent";
+}
+
 export function createApp() {
   const app = express();
 
   app.use(
     pinoHttp({
       logger,
+      customLogLevel: requestLogLevel,
       serializers: {
         req(req) {
           return {

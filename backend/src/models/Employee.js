@@ -19,6 +19,8 @@ const employeeSchema = new mongoose.Schema(
     phone: { type: String, trim: true },
     department: { type: String, required: true, trim: true, index: true },
     designation: { type: String, required: true, trim: true },
+    shiftStartTime: { type: String, required: true, default: "09:00", trim: true },
+    shiftEndTime: { type: String, required: true, default: "18:00", trim: true },
     reportingManager: { type: mongoose.Schema.Types.ObjectId, ref: "Employee" },
     joiningDate: { type: Date, required: true },
     employmentStatus: {
